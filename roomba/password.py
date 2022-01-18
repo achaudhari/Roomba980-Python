@@ -191,7 +191,7 @@ class Password(object):
         
         #context = ssl.SSLContext(ssl.PROTOCOL_TLS)
         context = ssl.SSLContext()
-        #context.set_ciphers('DEFAULT@SECLEVEL=1:HIGH:!DH:!aNULL')
+        context.set_ciphers('DEFAULT@SECLEVEL=1:HIGH:!DH:!aNULL')
         wrappedSocket = context.wrap_socket(sock)
         
         try:

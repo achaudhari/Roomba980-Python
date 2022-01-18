@@ -654,9 +654,9 @@ class Roomba(object):
                 self.dict_merge(self.master_state, json_data)
 
                 if self.pretty_print:
-                    self.log.info("%-{:d}s : %s".format(self.master_indent) % (msg.topic, log_string))
+                    self.log.debug("%-{:d}s : %s".format(self.master_indent) % (msg.topic, log_string))
                 else:
-                    self.log.info("Received Roomba Data: {}, {}".format(str(msg.topic), str(msg.payload)))
+                    self.log.debug("Received Roomba Data: {}, {}".format(str(msg.topic), str(msg.payload)))
 
                 if self.raw:
                     self.publish(msg.topic, msg.payload)
@@ -1562,17 +1562,18 @@ class Roomba(object):
             self.timer('ignore_coordinates')
             current_mission = None  #force update of map
 
-        self.log.info('current_state: {}, current phase: {}, mission: {}, mission_min: {}, recharge_min: {}, co-ords changed: {}'.format(self.current_state,
+        if phase == "charge":
+            #self.set_history('pose', self.zero_pose())
+            current_mission = None
+
+        if current_mission is not None and self.current_state != current_mission:
+            self.log.info('current_state: {}, current phase: {}, mission: {}, mission_min: {}, recharge_min: {}, co-ords changed: {}'.format(self.current_state,
                                                                                                                     phase,
                                                                                                                     mission,
                                                                                                                     self.mssnM,
                                                                                                                     self.rechrgM,
                                                                                                                     self.changed('pose')))
 
-        if phase == "charge":
-            #self.set_history('pose', self.zero_pose())
-            current_mission = None
-            
         if self.current_state == self.states["new"] and phase != 'run':
             self.log.info('waiting for run state for New Missions')
             if time.time() - self.timers['start'] >= 20:
@@ -1617,7 +1618,7 @@ class Roomba(object):
             except KeyError:
                 self.log.warning('phase: {} not found in self.states'.format(phase))
 
-        if self.current_state != current_mission:
+        if current_mission is not None and self.current_state != current_mission:
             self.log.info("updated state to: {}".format(self.current_state))
 
         self.publish("state", self.current_state)
