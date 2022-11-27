@@ -444,7 +444,8 @@ class Roomba(object):
         self.max_sqft = None
         self.cb = None
         
-        self.is_connected = asyncio.Event(loop=self.loop)
+        # self.is_connected = asyncio.Event(loop=self.loop) # AC edit
+        self.is_connected = asyncio.Event()
         self.q = asyncio.Queue()
         self.command_q = asyncio.Queue()            
         self.loop.create_task(self.process_q())
