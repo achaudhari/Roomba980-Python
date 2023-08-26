@@ -152,7 +152,7 @@ class icons():
             if not size:
                 size = self.size
             icon = Image.open(filename).convert('RGBA').resize(
-                size,Image.ANTIALIAS)
+                size,Image.LANCZOS)
             icon = make_transparent(icon)
             icon = icon.rotate(180-self.angle, expand=False)
             self.icons[name] = icon
@@ -203,7 +203,7 @@ class icons():
             size = self.size
             
         if icon_name in ['roomba', 'stuck', 'cancelled']:
-            icon = self.base_icon.copy().resize(size,Image.ANTIALIAS)
+            icon = self.base_icon.copy().resize(size,Image.LANCZOS)
         else:
             icon = Image.new('RGBA', size, transparent)
         draw_icon = ImageDraw.Draw(icon)
@@ -599,7 +599,7 @@ class Roomba(object):
     async def _disconnect(self):
         #if self.ws:
         #    await self.ws.cancel()
-        tasks = [t for t in asyncio.Task.all_tasks() if t is not asyncio.Task.current_task()]
+        tasks = [t for t in asyncio.all_tasks() if t is not asyncio.Task.current_task()]
         [task.cancel() for task in tasks]
         self.log.info("Cancelling {} outstanding tasks".format(len(tasks)))
         await asyncio.gather(*tasks, return_exceptions=True)
@@ -1814,11 +1814,11 @@ class Roomba(object):
         #draw text - (WARNING old versions of PIL have huge memory leak here!)
         if display_text is None: return
         indent = display_text.find(':')+1
-        max_len = image.size[0]//(fnt.getsize(display_text)[0]//len(display_text))
+        max_len = image.size[0]//(fnt.getlength(display_text)//len(display_text))
         display_text = textwrap.fill(display_text, max_len, subsequent_indent=' ' * indent)
         self.log.info("MAP: writing text: pos: {}, max_len: {}, text: {}".format(pos, max_len, display_text))
         if rotate:
-            txt = self.make_blank_image(*fnt.getsize(display_text))
+            txt = self.make_blank_image(*fnt.getlength(display_text))
             text = ImageDraw.Draw(txt)
             # draw text rotated 180 degrees...
             text.text((0,0), display_text, font=fnt, fill=colour)
